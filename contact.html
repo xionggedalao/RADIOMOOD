@@ -2,6 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="这只是一个电波">
   <title>RADIOMOOD情緒電波</title>
   <link rel="shortcut icon" href="assets/images/480736bbd01a7fea9d6331d15f4b8339.png" type="image/x-icon">
@@ -20,12 +21,11 @@
       background: #000; color: #fff;
       font-family: "Helvetica Neue", Helvetica, Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
       -webkit-font-smoothing: antialiased;
-      /* 👇 改成 Flex 布局，确保页脚永远在最下面 */
       display: flex;
       flex-direction: column;
     }
 
-    /* === 2. 顶部导航 === */
+    /* === 2. 顶部导航 (电脑端) === */
     header {
       position: fixed; top: 0; left: 0; width: 100%; height: 60px;
       padding: 0 40px; z-index: 999;
@@ -42,24 +42,29 @@
     .nav-item { text-decoration: none; color: #fff; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 17px; font-weight: 350; letter-spacing: 1px; text-transform: uppercase; transition: opacity 0.3s; }
     .nav-item:hover { opacity: 0.6; }
 
+    /* 默认隐藏汉堡按钮 (电脑端) */
     .hamburger-btn {
       display: none; flex-direction: column; justify-content: space-between;
       width: 24px; height: 18px; background: none; border: none; cursor: pointer; z-index: 1001;
     }
     .hamburger-btn span { display: block; width: 100%; height: 2px; background-color: #fff; transition: all 0.3s; }
+    
+    /* 汉堡按钮动画 */
+    .hamburger-btn.active span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+    .hamburger-btn.active span:nth-child(2) { opacity: 0; }
+    .hamburger-btn.active span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
 
     /* === 3. 核心内容区域 === */
     .contact-hero {
-      /* 👇 flex: 1 让它自动撑满剩余空间，把页脚挤到底部 */
       flex: 1; 
       width: 100%;
       position: relative;
       display: flex;
       flex-direction: column;
-      justify-content: center; /* 垂直居中 */
-      align-items: center;     /* 水平居中 */
+      justify-content: center; 
+      align-items: center; 
       text-align: center;
-      overflow: hidden; /* 防止视频溢出 */
+      overflow: hidden; 
     }
 
     .bg-video {
@@ -71,7 +76,7 @@
     .collab-title {
       font-size: 48px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase;
       margin: 0 0 20px 0; text-shadow: 0 10px 30px rgba(0,0,0,0.5); line-height: 1.2; width: auto;
-      margin-left: 28px; /* 向右微调 */
+      margin-left: 28px; /* 视觉微调 */
     }
 
     .collab-email {
@@ -85,7 +90,7 @@
     .mail-icon { width: 16px; height: 16px; fill: currentColor; }
 
 
-    /* === 4. 底部页脚 (从 page1 完美移植) === */
+    /* === 4. 底部页脚 === */
     .site-footer {
       width: 100%; height: auto; min-height: 90px; background-color: #000; color: #fff;
       display: flex; justify-content: space-between; align-items: center; 
@@ -93,7 +98,7 @@
       font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
       font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;
       z-index: 10; position: relative; 
-      flex-shrink: 0; /* 防止被挤压 */
+      flex-shrink: 0; 
     }
     .footer-left { z-index: 2; }
     .footer-left span { margin-right: 15px; }
@@ -114,11 +119,14 @@
     .social-icon:hover { opacity: 1; transform: scale(1.1); }
 
 
-    /* === 📱 手机端适配 === */
-    @media (max-width: 768px) {
-      header { padding: 0 20px; background: rgba(0, 0, 0, 0.8); }
-      .hamburger-btn { display: flex; }
+    /* === 📱 手机端强力适配 (已升级到 1000px) === */
+    /* ⚠️ 这里的 1000px 是关键！确保手机上一定进入这个模式 */
+    @media (max-width: 1000px) {
       
+      /* 1. 找回汉堡菜单 */
+      .hamburger-btn { display: flex !important; }
+      
+      /* 2. 隐藏默认导航，点击后显示 */
       .nav-menu {
         display: none; position: absolute; top: 60px; left: 0; width: 100%;
         background: rgba(0, 0, 0, 0.95); flex-direction: column; padding: 20px 0;
@@ -127,19 +135,24 @@
       .nav-menu.active { display: flex; animation: fadeIn 0.3s ease; }
       .nav-item { font-size: 14px; padding: 15px 0; width: 100%; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
 
-      .hamburger-btn.active span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
-      .hamburger-btn.active span:nth-child(2) { opacity: 0; }
-      .hamburger-btn.active span:nth-child(3) { transform: rotate(-45deg) translate(5px, -6px); }
-
+      /* 3. 字体和间距调整 */
+      header { padding: 0 20px !important; background: rgba(0, 0, 0, 0.8) !important; }
       .collab-title { font-size: 24px; padding: 0 20px; margin-left: 0; }
       .collab-email { font-size: 13px; padding: 10px 20px; }
 
-      /* 页脚手机适配 */
-      .site-footer { flex-direction: column; justify-content: center; align-items: center; gap: 15px; padding: 25px 20px; text-align: center; }
-      .footer-center { position: static; transform: none; order: 2; margin: 10px 0; }
-      .footer-left { order: 1; }
-      .footer-right { order: 3; }
-      .footer-left span { display: block; margin: 5px 0; }
+      /* 4. 页脚强制堆叠 (修复乱跑) */
+      .site-footer { 
+        padding: 30px 20px !important; 
+        flex-direction: column !important; 
+        justify-content: center !important; 
+        align-items: center !important; 
+        gap: 20px !important; 
+        text-align: center !important; 
+      }
+      .footer-center { position: static !important; transform: none !important; order: 2 !important; margin: 10px 0 !important; }
+      .footer-left { order: 1 !important; display: flex; flex-direction: column; gap: 5px; }
+      .footer-right { order: 3 !important; }
+      .footer-left span { margin: 0 !important; }
     }
     
     @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
@@ -159,7 +172,7 @@
       <a href="page1.html" class="nav-item">首页</a>
       <a href="artist.html" class="nav-item">艺术家作品</a>
       <a href="shop.html" class="nav-item">商店</a>
-      <a href="contact.html" class="nav-item" style="opacity: 1; border-bottom: 1px solid #fff;">联系我们</a>
+      <a href="contact.html" class="nav-item" style="opacity: 1; border-bottom: 2px solid #fff;">联系我们</a>
     </nav>
   </header>
 
@@ -188,7 +201,7 @@
     
     <div class="footer-center">
       <a href="https://xhslink.com/m/6LToxr7DEWs" target="_blank"><img src="assets/images/xhs2.png" class="social-icon" alt="XiaoHongShu"></a>
-      <a href="https://v.douyin.com/8UQ1gHhIeYU/ 7@9.com" target="_blank"><img src="assets/images/douyin.png" class="social-icon" alt="DouYin"></a>
+      <a href="https://v.douyin.com/8UQ1gHhIeYU/" target="_blank"><img src="assets/images/douyin.png" class="social-icon" alt="DouYin"></a>
       <a href="https://www.instagram.com/im_rd331/" target="_blank"><img src="assets/images/ins.png" class="social-icon" alt="Instagram"></a>
       <a href="assets/images/wc-code.png" target="_blank"><img src="assets/images/sph.png" class="social-icon" alt="Channels"></a>
     </div>
