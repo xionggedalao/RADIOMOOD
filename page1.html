@@ -1,216 +1,275 @@
 <!DOCTYPE html>
-<html  >
+<html lang="zh-CN">
 <head>
-  <!-- Site made with Mobirise Website Builder v6.1.12, https://mobirise.com -->
   <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="generator" content="Mobirise v6.1.12, mobirise.com">
-  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
-  <link rel="shortcut icon" href="assets/images/480736bbd01a7fea9d6331d15f4b8339.png" type="image/x-icon">
-  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RADIOMOOD 情緒電波</title>
   
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&display=swap" rel="stylesheet">
   
-  <title>Page 1</title>
-  <link rel="stylesheet" href="assets/web/assets/mobirise-icons2/mobirise2.css">
-  <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
-  <link rel="stylesheet" href="assets/animatecss/animate.css">
-  <link rel="stylesheet" href="assets/theme/css/style.css">
-  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;700&display=swap&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;700&display=swap&display=swap"></noscript>
-  <link rel="preload" as="style" href="assets/mobirise/css/mbr-additional.css?v=q0v9mg"><link rel="stylesheet" href="assets/mobirise/css/mbr-additional.css?v=q0v9mg" type="text/css">
+  <style>
+    /* === 1. 全局设置 === */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  
-  
-  
+    html, body {
+      margin: 0; padding: 0; width: 100%;
+      background: #000; color: #fff;
+      font-family: "Helvetica Neue", Helvetica, Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* === 2. 滚动容器 === */
+    .scroll-container {
+      width: 100%; height: 100vh;
+      overflow-y: auto; overflow-x: hidden;
+      scroll-behavior: smooth;
+    }
+    @media (max-width: 768px) {
+      .scroll-container { scroll-snap-type: y mandatory; }
+      .page-section { scroll-snap-align: start; }
+      .site-footer { scroll-snap-align: end; } 
+    }
+    .page-section { width: 100%; height: 100vh; position: relative; overflow: hidden; }
+
+    /* === 3. 顶部导航 (汉堡菜单版) === */
+    header {
+      position: fixed; top: 0; left: 0; width: 100%; height: 60px;
+      padding: 0 40px; z-index: 999;
+      display: flex; justify-content: space-between; align-items: center;
+      background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .brand-group { text-decoration: none; color: #fff; display: flex; flex-direction: column; justify-content: center; }
+    .brand-en { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; letter-spacing: 0.5px; line-height: 0.7; text-transform: uppercase; }
+    .brand-cn { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; letter-spacing: 0.5px; margin-top: 3px; opacity: 1; }
+    
+    .nav-menu { display: flex; gap: 30px; align-items: center; }
+    .nav-item { text-decoration: none; color: #fff; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 17px; font-weight: 350; letter-spacing: 1px; text-transform: uppercase; transition: opacity 0.3s; }
+    .nav-item:hover { opacity: 0.6; }
+
+    .hamburger-btn {
+      display: none; flex-direction: column; justify-content: space-between;
+      width: 24px; height: 18px; background: none; border: none; cursor: pointer; z-index: 1001;
+    }
+    .hamburger-btn span { display: block; width: 100%; height: 2px; background-color: #fff; transition: all 0.3s; }
+    
+
+
+    /* === 4. 第一页：左右分屏 === */
+    .split-container { display: flex; width: 100%; height: 100%; }
+    .split { flex: 1; height: 100%; position: relative; background-size: cover; background-position: center; transition: flex 0.6s cubic-bezier(0.16, 1, 0.3, 1); cursor: pointer; text-decoration: none; display: flex; align-items: flex-end; overflow: hidden; }
+    .left-side { background-image: url('assets/images/left.png'); }
+    .right-side { background-image: url('assets/images/right.png'); }
+    .big-label { margin: 50px; color: #fff; font-size: 15px; font-weight: 700; letter-spacing: 2px; z-index: 2; text-transform: uppercase; }
+    .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.1); transition: background 0.4s; }
+    .split:hover { flex: 1.5; }
+    .split:hover .overlay { background: rgba(0,0,0,0); }
+    .split-container:hover .split:not(:hover) .overlay { background: rgba(0,0,0,0.5); }
+
+
+    /* === 5. 第二页：全屏视频 (已修复全屏点击+喇叭) === */
+    .video-section-content { width: 100%; height: 100%; position: relative; }
+    
+    .fullscreen-video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; opacity: 0.8; }
+
+    /* ⭐ 修复：全屏点击链接 */
+    .full-screen-link {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      z-index: 2; /* 在视频上，在喇叭下 */
+      text-decoration: none; display: flex; align-items: flex-end; /* 内容沉底 */
+      background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 30%);
+    }
+
+    .video-label {
+      margin: 50px; color: #fff; font-size: 15px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; transition: opacity 0.3s;
+    }
+    .full-screen-link:hover .video-label { opacity: 0.7; text-decoration: none; }
+
+    /* ⭐ 修复：声音开关按钮 */
+    .sound-toggle {
+      position: absolute; bottom: 50px; right: 50px;
+      z-index: 10; /* 比全屏链接高 */
+      background: none; border: 1px solid rgba(255,255,255,0.3); border-radius: 50%;
+      width: 40px; height: 40px; display: flex; justify-content: center; align-items: center;
+      cursor: pointer; transition: all 0.3s; backdrop-filter: blur(5px);
+    }
+    .sound-toggle:hover { background: rgba(255,255,255,0.2); border-color: #fff; transform: scale(1.1); }
+    .speaker-icon { width: 18px; height: 18px; fill: #fff; }
+
+
+    /* === 6. 底部页脚 === */
+    .site-footer {
+      width: 100%; height: auto; min-height: 105px; background-color: #0c0c0c; color: #fff;
+      display: flex; justify-content: space-between; align-items: center; 
+      padding: 30px 40px; 
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;
+      z-index: 10; position: relative; 
+    }
+    .footer-left { z-index: 2; }
+    .footer-left span { margin-right: 15px; }
+    .footer-right { z-index: 2; opacity: 1; text-align: right; }
+    .gothic-email {
+      font-family: 'UnifrakturMaguntia', cursive; 
+      color: #fff; font-size: 24px; text-decoration: none; letter-spacing: 1px;
+      transition: all 0.3s ease; opacity: 1; text-transform: none !important;
+    }
+    .gothic-email:hover { opacity: 1; text-shadow: 0 0 10px rgba(255, 255, 255, 0.5); }
+    .footer-center {
+      position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); 
+      display: flex; gap: 30px; z-index: 2;
+    }
+    .social-icon { width: 20px; height: 20px; object-fit: contain; cursor: pointer; opacity: 0.9; transition: all 0.3s ease; }
+    .social-icon:hover { opacity: 1; transform: scale(1.1); }
+
+
+    /* === 📱 手机端适配 === */
+    @media (max-width: 768px) {
+      .split-container { flex-direction: column; }
+      header { padding: 0 20px; background: rgba(0, 0, 0, 0.8); }
+      .brand-en { font-size: 18px; }
+      .brand-cn { font-size: 18px; }
+
+      .hamburger-btn { display: flex; }
+
+      .nav-menu {
+        display: none; position: absolute; top: 60px; left: 0; width: 100%;
+        background: rgba(0, 0, 0, 0.95); flex-direction: column; padding: 20px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .nav-menu.active { display: flex; animation: fadeIn 0.3s ease; }
+      .nav-item { font-size: 14px; padding: 15px 0; width: 100%; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
+
+      .hamburger-btn.active span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+      .hamburger-btn.active span:nth-child(2) { opacity: 0; }
+      .hamburger-btn.active span:nth-child(3) { transform: rotate(-45deg) translate(5px, -6px); }
+
+      .big-label, .video-label { margin: 0; padding: 30px; }
+      /* 手机上声音按钮位置调整 */
+      .sound-toggle { bottom: 30px; right: 30px; }
+
+      .site-footer { flex-direction: column; justify-content: center; align-items: center; gap: 20px; padding: 40px 20px; text-align: center; }
+      .footer-center { position: static; transform: none; order: 2; margin: 10px 0; }
+      .footer-left { order: 1; }
+      .footer-right { order: 3; }
+      .footer-left span { display: block; margin: 5px 0; }
+    }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
 </head>
 <body>
-  
-  <section data-bs-version="5.1" class="header09 startm5 cid-vaoKMEoakp mbr-fullscreen" id="header09-d">	
+
+  <header>
+    <a href="index.html" class="brand-group">
+      <span class="brand-en">RADIOMOOD</span>
+      <span class="brand-cn">情緒電波</span>
+    </a>
+    <button class="hamburger-btn" onclick="toggleMenu()">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="nav-menu" id="navMenu">
+      <a href="page1.html" class="nav-item">首页</a>
+      <a href="artist.html" class="nav-item">艺术家作品</a>
+      <a href="shop.html" class="nav-item">商店</a>
+      <a href="contact.html" class="nav-item">联系我们</a>
+    </nav>
+  </header>
+
+  <div class="scroll-container">
     
-	
-	
-	<div class="container-fluid">
-		<div class="row">
-			<div class="content-wrap col-12 col-md-8">
-				<h1 class="mbr-section-title mbr-fonts-style mbr-white mb-4 display-1">
-					<strong>Create, connect, shine</strong>
-				</h1>
-				
-				<p class="mbr-fonts-style mbr-text mbr-white mb-4 display-7">
-					Mobirise Free Website Maker is perfect for non-techies and great for pro-coders for fast prototyping
-					and small customers' projects.
-				</p>
-				<div class="mbr-section-btn">
-					<a class="btn btn-danger display-7" href="https://mobiri.se">
-						Learn more
-					</a>
-				</div>
-			</div>
-		</div>
-	</div>
-</section>
-
-<section data-bs-version="5.1" class="header19 cid-vaoKOa8j9p mbr-fullscreen" id="header19-e">
-  
-
-  
-  
-  <div class="container">
-    <div class="row">
-      <div class="content-wrap col-12 col-md-8">
-        <h1 class="mbr-section-title mbr-fonts-style mb-4 display-1">
-          <strong>Experience the future</strong>
-        </h1>
-        <p class="mbr-fonts-style mbr-text mb-4 display-7">
-          Stay ahead with our cutting-edge software. Give it a try today and step into a future filled with innovation,
-          making your tasks easier and more enjoyable.
-        </p>
-        <div class="mbr-section-btn">
-          <a class="btn btn-warning display-7" href="https://mobiri.se">
-            Download Software
-          </a>
-        </div>
-        <p class="mbr-fonts-style mbr-description mt-4 display-7">
-          Compatible with Windows and macOS.
-        </p>
+    <section class="page-section">
+      <div class="split-container">
+        <a href="artist.html" class="split left-side">
+          <div class="overlay"></div>
+          <span class="big-label">RADIOMOOD 2026 S/S SPRING WAVE · 春日电波 &rarr;</span>
+        </a>
+        <a href="shop.html" class="split right-side">
+          <div class="overlay"></div>
+          <span class="big-label">购物 &rarr;</span>
+        </a>
       </div>
-    </div>
+    </section>
+
+    <section class="page-section">
+      <div class="video-section-content">
+        <video id="bg-video" class="fullscreen-video" autoplay loop muted playsinline>
+          <source src="assets/images/page2.mp4" type="video/mp4">
+        </video>
+
+        <a href="artist.html" class="full-screen-link">
+          <span class="video-label">视觉企划 VISUAL CAMPAIGN &rarr;</span>
+        </a>
+
+        <button class="sound-toggle" onclick="toggleSound()">
+          <svg id="mute-icon" class="speaker-icon" viewBox="0 0 24 24">
+             <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73 4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
+          </svg>
+          <svg id="sound-icon" class="speaker-icon" viewBox="0 0 24 24" style="display:none;">
+            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+          </svg>
+        </button>
+
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      <div class="footer-left">
+        <span>RADIOMOOD © 2026</span>
+        <span>库存商</span>
+        <span>接触</span>
+        <span>合法的</span>
+      </div>
+      
+      <div class="footer-center">
+        <a href="https://xhslink.com/m/6LToxr7DEWs" target="_blank"><img src="assets/images/xhs2.png" class="social-icon" alt="XiaoHongShu"></a>
+        <a href="https://v.douyin.com/8UQ1gHhIeYU/ 7@9.com" target="_blank"><img src="assets/images/douyin.png" class="social-icon" alt="DouYin"></a>
+        <a href="https://www.instagram.com/im_rd331/" target="_blank"><img src="assets/images/ins.png" class="social-icon" alt="Instagram"></a>
+        <a href="assets/images/wc-code.png" target="_blank"><img src="assets/images/sph.png" class="social-icon" alt="Channels"></a>
+      </div>
+      
+      <div class="footer-right">
+      <a href="mailto:radiomood@gmail.com" class="gothic-email">
+          radiomood@gmail.com
+        </a>
+      </div>
+    </footer>
+
   </div>
-</section>
 
-<section data-bs-version="5.1" class="header18 cid-vaoKPeTaRG" data-bg-video="https://www.youtube.com/watch?v=2Gg6Seob5Mg" id="header18-f">
-  
+  <script>
+    // 1. 汉堡菜单控制
+    function toggleMenu() {
+      var menu = document.getElementById("navMenu");
+      var btn = document.querySelector(".hamburger-btn");
+      menu.classList.toggle("active");
+      btn.classList.toggle("active");
+    }
 
-  <div class="mbr-overlay" style="opacity: 0.5; background-color: rgb(0, 0, 0);"></div>
-  <div class="container-fluid">
-    <div class="row">
-      <div class="content-wrap col-12 col-md-12">
-        <h1 class="mbr-section-title mbr-fonts-style mbr-white mb-4 display-1">
-          <strong><br>Video background</strong>
-        </h1>
-        
-        <p class="mbr-fonts-style mbr-text mbr-white mb-4 display-7">Full-width block with YouTube video background and flexible
-          configuration, free vertical and horizontal
-          content alignment.&nbsp;</p>
-        <div class="mbr-section-btn"><a class="btn btn-white-outline display-7" href="https://mobiri.se">Learn More</a></div>
-      </div>
-    </div>
-  </div>
-</section>
+    // 2. 声音控制 (把这个功能补回来了！)
+    function toggleSound() {
+      var video = document.getElementById("bg-video");
+      var muteIcon = document.getElementById("mute-icon");
+      var soundIcon = document.getElementById("sound-icon");
+      var btn = document.querySelector(".sound-toggle");
 
-<section data-bs-version="5.1" class="header4 cid-vaoKQyYQkq" id="header04-g">
-	
+      if (video.muted) {
+        video.muted = false; // 开启声音
+        muteIcon.style.display = "none";
+        soundIcon.style.display = "block";
+        btn.style.borderColor = "#fff";
+      } else {
+        video.muted = true; // 静音
+        muteIcon.style.display = "block";
+        soundIcon.style.display = "none";
+        btn.style.borderColor = "rgba(255,255,255,0.3)";
+      }
+    }
+  </script>
 
-	
-	
-
-	<div class="container-fluid">
-		<div class="row justify-content-center">
-			<div class="col-12 col-md">
-				<div class="text-wrapper">
-					<h2 class="mbr-section-title mb-4 mbr-fonts-style display-2">
-						<strong>Intro with video</strong>
-					</h2>
-					<p class="mbr-text mb-4 mbr-fonts-style display-7">
-						Intro with color, paddings and a video on the right. Mobirise helps you cut down development
-						time by providing you with a flexible website editor with a drag and drop interface.
-					</p>
-					<div class="mbr-section-btn mb-4">
-						<a class="btn btn-primary display-7" href="https://mobiri.se">Learn more</a>
-					</div>
-				</div>
-			</div>
-			<div class="mbr-figure col-12 col-md-8"><iframe class="mbr-embedded-video" src="https://www.youtube.com/embed/-BSQlJxCDcI?rel=0&amp;amp;mute=1&amp;showinfo=0&amp;autoplay=1&amp;loop=1&amp;playlist=-BSQlJxCDcI" width="1280" height="720" frameborder="0" allowfullscreen></iframe></div>
-		</div>
-	</div>
-</section>
-
-<section data-bs-version="5.1" class="features10 cid-vaoKRZUSfx" id="features010-h">
-  
-
-  
-  
-  <div class="container">
-    
-    <div class="row">
-      <div class="item features-without-image col-12 col-md-6 col-lg-4">
-        <div class="item-wrapper">
-          <div class="card-box align-left">
-            <div class="iconfont-wrapper mb-3">
-              <span class="mbr-iconfont mobi-mbri-idea mobi-mbri"></span>
-            </div>
-            <h5 class="card-title mbr-fonts-style display-5">
-              <strong>Creation</strong>
-            </h5>
-            <p class="card-text mbr-fonts-style mb-3 display-7">
-              Lorem ipsum dolor sit amet nulla vel, consectetur massa
-              adipiscing.
-            </p>
-            
-          </div>
-        </div>
-      </div>
-      <div class="item features-without-image col-12 col-md-6 col-lg-4">
-        <div class="item-wrapper">
-          <div class="card-box align-left">
-            <div class="iconfont-wrapper mb-3">
-              <span class="mbr-iconfont mobi-mbri-growing-chart mobi-mbri"></span>
-            </div>
-            <h5 class="card-title mbr-fonts-style display-5">
-              <strong>Promotion</strong>
-            </h5>
-            <p class="card-text mbr-fonts-style mb-3 display-7">
-              Lorem ipsum dolor sit amet nulla vel, consectetur massa
-              adipiscing.
-            </p>
-            
-          </div>
-        </div>
-      </div>
-      <div class="item features-without-image col-12 col-md-6 col-lg-4">
-        <div class="item-wrapper">
-          <div class="card-box align-left">
-            <div class="iconfont-wrapper mb-3">
-              <span class="mbr-iconfont mobi-mbri-change-style mobi-mbri"></span>
-            </div>
-            <h5 class="card-title mbr-fonts-style display-5">
-              <strong>Branding</strong>
-            </h5>
-            <p class="card-text mbr-fonts-style mb-3 display-7">
-              Lorem ipsum dolor sit amet nulla vel, consectetur massa
-              adipiscing.
-            </p>
-            
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section data-bs-version="5.1" class="start article6 cid-vaoKUx3l8J" id="article06-i">
-	
-
-	
-	
-	<div class="container">
-		<div class="row justify-content-center">
-			<div class="card col-md-12 col-lg-12">
-				<div class="card-wrapper">
-					<div class="card-box align-left">
-						<h4 class="card-title mbr-fonts-style display-2">
-							<strong>Start Creating Magic Now!</strong>
-						</h4>
-						
-						
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-</section><section class="display-7" style="padding: 0;align-items: center;justify-content: center;flex-wrap: wrap;    align-content: center;display: flex;position: relative;height: 4rem;"><a href="https://mobiri.se/" style="flex: 1 1;height: 4rem;position: absolute;width: 100%;z-index: 1;"><img alt="" style="height: 4rem;" src="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="></a><p style="margin: 0;text-align: center;" class="display-7">&#8204;</p><a style="z-index:1" href="https://mobirise.com/drag-drop-website-builder.html">Drag & Drop Website Builder</a></section><script src="assets/bootstrap/js/bootstrap.bundle.min.js"></script>  <script src="assets/smoothscroll/smooth-scroll.js"></script>  <script src="assets/ytplayer/index.js"></script>  <script src="assets/vimeoplayer/player.js"></script>  <script src="assets/theme/js/script.js"></script>  
-  
-  
-  <input name="animation" type="hidden">
-  </body>
+</body>
 </html>

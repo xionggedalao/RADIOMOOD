@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="description" content="这只是一个电波">
+  <title>RADIOMOOD情緒電波</title>
+  <link rel="shortcut icon" href="assets/images/480736bbd01a7fea9d6331d15f4b8339.png" type="image/x-icon">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&display=swap" rel="stylesheet">
+  
+  <style>
+    /* === 1. 全局设置 === */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; width: 100%; min-height: 100vh; color: #fff; font-family: "Helvetica Neue", Helvetica, Arial, "PingFang SC", "Microsoft YaHei", sans-serif; -webkit-font-smoothing: antialiased; display: flex; flex-direction: column; }
+/* 👇👇👇！！就是这里！！你之前漏掉了这段代码！！👇👇👇 */
+    #bg-video-player {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover; /* 保证铺满屏幕 */
+      z-index: -2; /* 放在最底层 (比遮罩层还要低) */
+    }
+    body::before { content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4); z-index: -1; }
+
+    /* === 2. 顶部导航 === */
+    header { position: fixed; top: 0; left: 0; width: 100%; height: 60px; padding: 0 40px; z-index: 999; display: flex; justify-content: space-between; align-items: center; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+    .brand-group { text-decoration: none; color: #fff; display: flex; flex-direction: column; justify-content: center; }
+    .brand-en { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; letter-spacing: 0.5px; line-height: 0.7; text-transform: uppercase; }
+    .brand-cn { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; letter-spacing: 0.5px; margin-top: 3px; opacity: 1; }
+    .nav-menu { display: flex; gap: 30px; align-items: center; }
+    .nav-item { text-decoration: none; color: #fff; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 17px; font-weight: 350; letter-spacing: 1px; text-transform: uppercase; transition: opacity 0.3s; }
+    .nav-item:hover { opacity: 0.6; }
+    .hamburger-btn { display: none; flex-direction: column; justify-content: space-between; width: 24px; height: 18px; background: none; border: none; cursor: pointer; z-index: 1001; }
+    .hamburger-btn span { display: block; width: 100%; height: 2px; background-color: #fff; transition: all 0.3s; }
+
+    /* === 3. 筛选器 === */
+    .filter-wrapper { margin-top: 100px; width: 100%; max-width: 1400px; margin-left: auto; margin-right: auto; padding: 0 40px; }
+    .filter-panel { background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px); border-radius: 20px; padding: 30px; width: 100%; position: relative; }
+    .filter-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; gap: 20px; }
+    .search-bar { flex: 1; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 12px 20px; display: flex; align-items: center; transition: all 0.3s; }
+    .search-bar:focus-within { border-color: #990000; }
+    .search-input { background: none; border: none; color: #fff; outline: none; width: 100%; font-size: 14px; }
+    .clear-btn { padding: 12px 20px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; color: rgba(255, 255, 255, 0.7); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s; white-space: nowrap; }
+    .clear-btn:hover { border-color: #990000; color: #fff; background: rgba(153, 0, 0, 0.1); }
+    .filter-tags-area { display: flex; flex-direction: column; gap: 15px; }
+    .filter-group { display: flex; flex-wrap: wrap; gap: 10px; align-items: baseline; }
+    .filter-label { font-size: 13px; color: rgba(255,255,255,0.5); font-weight: 700; width: 80px; flex-shrink: 0; text-transform: uppercase; letter-spacing: 1px;}
+    .tag { font-size: 12px; color: #fff; background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.1); padding: 6px 14px; border-radius: 20px; cursor: pointer; transition: all 0.2s; }
+    .tag:hover, .tag.active { border-color: #990000; background: rgba(153, 0, 0, 0.2); color: #fff; }
+
+    /* === 4. 作品网格 === */
+    .works-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 30px; padding: 40px; width: 100%; max-width: 1400px; margin: 0 auto; flex: 1; }
+    .work-card { background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; overflow: hidden; transition: transform 0.3s; cursor: pointer; }
+    .work-card:hover { transform: translateY(-5px); border-color: #990000; }
+    .work-img-box { width: 100%; height: 220px; overflow: hidden; position: relative; }
+    .work-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+    .work-card:hover .work-img { transform: scale(1.05); }
+    .work-info { padding: 15px 20px; }
+    .work-title { font-size: 16px; font-weight: 700; margin-bottom: 10px; text-transform: uppercase; }
+    .work-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+    .mini-tag { font-size: 10px; background: rgba(255,255,255,0.15); padding: 4px 8px; border-radius: 6px; }
+
+    /* === 5. 详情弹窗 (升级版) === */
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 2000; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(8px); }
+    .modal-content { background: rgba(20, 20, 20, 0.95); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 20px; width: 100%; max-width: 1000px; height: auto; max-height: 90vh; display: flex; gap: 30px; padding: 40px; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.5); overflow-y: auto; animation: modalPop 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+    @keyframes modalPop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .close-modal { position: absolute; top: 20px; right: 20px; font-size: 30px; color: #fff; cursor: pointer; opacity: 0.6; transition: all 0.3s; line-height: 1; z-index: 10; }
+    .close-modal:hover { opacity: 1; color: #990000; transform: rotate(90deg); }
+
+    /* 左侧媒体区域 (图片或视频) */
+    .modal-media-container { flex: 1.2; min-width: 300px; background: #000; border-radius: 10px; overflow: hidden; position: relative; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.1); }
+    .modal-media { width: 100%; height: 100%; object-fit: contain; display: block; }
+    /* 隐藏的视频元素 */
+    #modalVideo { display: none; width: 100%; height: 100%; }
+
+    /* 右侧文本区域 */
+    .modal-text { flex: 0.8; display: flex; flex-direction: column; justify-content: flex-start; padding-top: 10px; }
+    .modal-title { font-size: 32px; font-weight: 800; margin-bottom: 20px; text-transform: uppercase; line-height: 1.1; color: #fff; }
+    
+    /* 介绍文字 */
+    .modal-desc-box { margin-bottom: 20px; }
+    .modal-desc { font-size: 15px; line-height: 1.6; color: rgba(255,255,255,0.8); white-space: pre-wrap; }
+    
+    /* 平台链接区域 */
+    .modal-platforms { margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); }
+    .platform-label { font-size: 12px; color: rgba(255,255,255,0.5); font-weight: 700; display: block; margin-bottom: 10px; text-transform: uppercase; }
+    .platform-icons { display: flex; gap: 15px; }
+    .platform-link { opacity: 0.7; transition: all 0.3s; }
+    .platform-link:hover { opacity: 1; transform: scale(1.1); }
+    .platform-icon-img { width: 24px; height: 24px; object-fit: contain; filter: none !important; }
+
+    .modal-tags { margin-top: auto; display: flex; gap: 10px; flex-wrap: wrap; padding-top: 20px; }
+    .modal-tag { font-size: 12px; border: 1px solid #fff; padding: 6px 14px; border-radius: 20px; text-transform: uppercase; }
+
+    /* === 6. 页脚 === */
+    .site-footer { width: 100%; height: auto; min-height: 105px; background-color: #000; color: #fff; display: flex; justify-content: space-between; align-items: center; padding: 30px 40px; border-top: 1px solid rgba(255,255,255,0.1); font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; z-index: 10; position: relative; }
+    .footer-left span { margin-right: 15px; } .footer-right { text-align: right; }
+    .gothic-email { font-family: 'UnifrakturMaguntia', cursive; color: #fff; font-size: 24px; text-decoration: none; letter-spacing: 1px; transition: all 0.3s ease; text-transform: none !important; }
+    .gothic-email:hover { opacity: 1; text-shadow: 0 0 10px rgba(255, 255, 255, 0.5); }
+    .footer-center { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; gap: 30px; }
+    .social-icon { width: 20px; height: 20px; object-fit: contain; cursor: pointer; opacity: 1; filter: none !important; transition: all 0.3s ease; }
+    .social-icon:hover { transform: scale(1.1); }
+
+    /* === 📱 适配 === */
+    @media (max-width: 768px) {
+      .modal-content { flex-direction: column; padding: 25px; gap: 20px; max-height: 85vh; }
+      .modal-media-container { width: 100%; height: 250px; flex: none; }
+      header { padding: 0 20px; background: rgba(0, 0, 0, 0.8); }
+      .hamburger-btn { display: flex; }
+      .nav-menu { display: none; position: absolute; top: 60px; left: 0; width: 100%; background: rgba(0, 0, 0, 0.95); flex-direction: column; padding: 20px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+      .nav-menu.active { display: flex; animation: fadeIn 0.3s ease; }
+      .nav-item { font-size: 14px; padding: 15px 0; width: 100%; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
+      .filter-wrapper { padding: 0 20px; margin-top: 80px; }
+      .filter-panel { padding: 20px; }
+      .filter-header { flex-direction: column; gap: 10px; align-items: stretch; }
+      .clear-btn { text-align: center; }
+      .filter-label { width: 100%; margin-bottom: 5px; } 
+      .works-grid { grid-template-columns: 1fr 1fr; padding: 20px; gap: 20px; }
+      .site-footer { flex-direction: column; justify-content: center; align-items: center; gap: 20px; padding: 40px 20px; text-align: center; }
+      .footer-center { position: static; transform: none; order: 2; margin: 10px 0; }
+      .footer-left { order: 1; } .footer-right { order: 3; } .footer-left span { display: block; margin: 5px 0; }
+    }
+  </style>
+</head>
+<body>
+    <video id="bg-video-player" autoplay muted loop playsinline>
+      <source src="assets/images/321.mp4" type="video/mp4">
+  </video>
+
+  <header>
+    <a href="index.html" class="brand-group">
+      <span class="brand-en">RADIOMOOD</span>
+      <span class="brand-cn">情緒電波</span>
+    </a>
+    <button class="hamburger-btn" onclick="toggleMenu()">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="nav-menu" id="navMenu">
+      <a href="page1.html" class="nav-item">首页</a>
+      <a href="artist.html" class="nav-item" style="opacity: 1; border-bottom: 1px solid #fff;">艺术家作品</a>
+      <a href="shop.html" class="nav-item">商店</a>
+      <a href="contact.html" class="nav-item">联系我们</a>
+    </nav>
+  </header>
+
+  <div class="filter-wrapper">
+    <div class="filter-panel">
+      <div class="filter-header">
+        <div class="search-bar"><input type="text" class="search-input" placeholder="搜索标题,品牌..."></div>
+        <button class="clear-btn">清除筛选条件</button>
+      </div>
+      <div class="filter-tags-area">
+        <div class="filter-group">
+          <span class="filter-label">艺术家:</span>
+          <span class="tag">RADIOMOOD情緒電波</span>
+          <span class="tag">我和我的懂品又被J搭讪了</span>
+          <span class="tag">Ruiii</span>
+          <span class="tag">J1sty</span>
+        </div>
+        <div class="filter-group">
+          <span class="filter-label">TYPE 类型:</span>
+          <span class="tag">视觉</span>
+          <span class="tag">音乐</span>
+          <span class="tag">合作</span>
+        </div>
+        <div class="filter-group">
+          <span class="filter-label">系列:</span>
+          <span class="tag">RADIOMOOD 2026SS SPRING WAVE · 春日电波</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="works-grid">
+    
+    <div class="work-card" 
+      data-desc="「墮天使」
+RADIOMOOD2026SS
+SPRING WAVE · 春日电波
+©RADIOMOOD｜RADIOMOOD.CN
+
+创作年份：2026
+参与艺术家：RADIOMOOD 核心团队"
+      data-video="assets/images/10(1).mp4" 
+      data-links="xhs:http://xhslink.com/o/1VGcxy7jZSs , dy:https://v.douyin.com/jl5M6qw2mHA/ 11/10 S@Y.mD Wmq:/, wc:assets/images/wc-code.png, ins:https://www.instagram.com/im_rd331/">
+      <div class="work-img-box"><img src="assets/images/2.png" class="work-img" alt="Work 1"></div>
+      <div class="work-info">
+        <div class="work-title">「墮天使」</div>
+        <div class="work-tags"><span class="mini-tag">RADIOMOOD情緒電波</span><span class="mini-tag">视觉</span><span class="mini-tag">RADIOMOOD 2026SS SPRING WAVE · 春日电波</span></div>
+      </div>
+    </div>
+
+    <div class="work-card" 
+      data-desc="「我們只是生活中的傀儡」
+灵感来源于现代社会的机械化生活，我们都是提线木偶
+RADIOMOOD2026SS
+SPRING WAVE · 春日电波
+©RADIOMOOD｜RADIOMOOD.CN
+
+创作年份：2026
+参与艺术家：RADIOMOOD 核心团队"
+      data-video="assets/images/111.mp4"
+      data-links="xhs:http://xhslink.com/o/1VGcxy7jZSs , dy:https://v.douyin.com/jl5M6qw2mHA/ 11/10 S@Y.mD Wmq:/, wc:assets/images/wc-code.png, ins:https://www.instagram.com/im_rd331/">
+      <div class="work-img-box"><img src="assets/images/6.png" class="work-img" alt="Work 2"></div>
+      <div class="work-info">
+        <div class="work-title">「我們只是生活中的傀儡」</div>
+        <div class="work-tags"><span class="mini-tag">RADIOMOOD情緒電波</span><span class="mini-tag">视觉</span><span class="mini-tag">RADIOMOOD 2026SS SPRING WAVE · 春日电波</span></div>
+      </div>
+    </div>
+
+    <div class="work-card" 
+      data-desc="「愛笑的男人運氣都不會差」
+RADIOMOOD2026SS
+SPRING WAVE · 春日电波
+©RADIOMOOD｜RADIOMOOD.CN
+
+创作年份：2026
+参与艺术家：RADIOMOOD 核心团队"
+      data-video="assets/images/5.mp4"
+      data-links="ins:https://www.instagram.com/im_rd331/, wc:assets/images/wc-code.png">
+      <div class="work-img-box"><img src="assets/images/3.png" class="work-img" alt="Work 3"></div>
+      <div class="work-info">
+        <div class="work-title">「愛笑的男人運氣都不會差」</div>
+        <div class="work-tags"><span class="mini-tag">RADIOMOOD情緒電波</span><span class="mini-tag">视觉</span><span class="mini-tag">RADIOMOOD 2026SS SPRING WAVE · 春日电波</span></div>
+      </div>
+    </div>
+
+    <div class="work-card" data-desc="「回到曾经那个时代」
+RADIOMOOD2026SS
+SPRING WAVE · 春日电波
+©RADIOMOOD｜RADIOMOOD.CN
+
+创作年份：2026
+参与艺术家：RADIOMOOD 核心团队" data-video="assets/images/121.mp4"data-links="ins:https://www.instagram.com/im_rd331/, wc:assets/images/wc-code.png" >
+      <div class="work-img-box"><img src="assets/images/5.png" class="work-img" alt="Work 4"></div>
+      <div class="work-info">
+        <div class="work-title">「回到曾经那个时代」</div>
+        <div class="work-tags"><span class="mini-tag">RADIOMOOD情緒電波</span><span class="mini-tag">视觉</span><span class="mini-tag">RADIOMOOD 2026SS SPRING WAVE · 春日电波</span></div>
+      </div>
+    </div>
+
+    <div class="work-card" data-desc="「熊猫眼」
+黑眼圈是我们的勋章
+RADIOMOOD2026SS
+SPRING WAVE · 春日电波
+©RADIOMOOD｜RADIOMOOD.CN
+
+创作年份：2026
+参与艺术家：RADIOMOOD 核心团队" data-video="assets/images/131.mp4" data-links="xhs:http://xhslink.com/o/1VGcxy7jZSs , dy:https://v.douyin.com/7dWRj_-Zpg8/ 01/22 c@a.Nw teo:/,wc:assets/images/wc-code.png, ins:https://www.instagram.com/im_rd331/" >
+      <div class="work-img-box"><img src="assets/images/1.png" class="work-img" alt="Work 5"></div>
+      <div class="work-info">
+        <div class="work-title">「熊猫眼」</div>
+        <div class="work-tags"><span class="mini-tag">RADIOMOOD情緒電波</span><span class="mini-tag">视觉</span></div>
+      </div>
+    </div>
+
+    <div class="work-card" 
+      data-desc="纸飞机 Music
+把话装进纸飞机里，抛向天空飞向你"
+      data-video="assets/images/9.mp4"
+      data-links="wyy:https://music.163.com/song?id=2756445767&uct2=U2FsdGVkX1+Fhv9XSr6sIPdx9sJsmliOQ8FLujSmKhw=">
+      <div class="work-img-box"><img src="assets/images/7.jpg" class="work-img" alt="Work 6"></div>
+      <div class="work-info">
+        <div class="work-title">「纸飞机」- J1sty</div>
+        <div class="work-tags"><span class="mini-tag">J1sty</span><span class="mini-tag">音乐</span></div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="footer-left"><span>RADIOMOOD © 2026</span><span>库存商</span><span>接触</span><span>合法的</span></div>
+    <div class="footer-center">
+      <a href="https://xhslink.com/m/6LToxr7DEWs" target="_blank"><img src="assets/images/xhs2.png" class="social-icon" alt="XiaoHongShu"></a>
+      <a href="https://v.douyin.com/8UQ1gHhIeYU/ 7@9.com" target="_blank"><img src="assets/images/douyin.png" class="social-icon" alt="DouYin"></a>
+      <a href="https://www.instagram.com/im_rd331/" target="_blank"><img src="assets/images/ins.png" class="social-icon" alt="Instagram"></a>
+      <a href="weixin://" target="_blank"><img src="assets/images/sph.png" class="social-icon" alt="Channels"></a>
+    </div>
+    <div class="footer-right"><a href="mailto:radiomood@gmail.com" class="gothic-email">radiomood@gmail.com</a></div>
+  </footer>
+
+  <div class="modal-overlay" id="workModal">
+    <div class="modal-content">
+      <span class="close-modal">&times;</span>
+      
+      <div class="modal-media-container">
+        <img src="" class="modal-media" id="modalImg">
+        <video id="modalVideo" controls loop playsinline>
+          <source src="" type="video/mp4">
+          您的浏览器不支持视频标签。
+        </video>
+      </div>
+
+      <div class="modal-text">
+        <h2 class="modal-title" id="modalTitle">TITLE</h2>
+        
+        <div class="modal-desc-box">
+          <div class="modal-desc" id="modalDesc">Description goes here...</div>
+        </div>
+
+        <div class="modal-platforms" id="modalPlatforms" style="display:none;">
+          <span class="platform-label">发布平台(可跳转):</span>
+          <div class="platform-icons" id="platformIconsContainer">
+            </div>
+        </div>
+
+        <div class="modal-tags" id="modalTags"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function toggleMenu() {
+      var menu = document.getElementById("navMenu");
+      var btn = document.querySelector(".hamburger-btn");
+      menu.classList.toggle("active");
+      btn.classList.toggle("active");
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // === 筛选逻辑 (不变) ===
+        const searchInput = document.querySelector('.search-input');
+        const clearBtn = document.querySelector('.clear-btn');
+        const filterTags = document.querySelectorAll('.filter-group .tag');
+        const workCards = document.querySelectorAll('.work-card');
+
+        filterTags.forEach(tag => {
+            tag.addEventListener('click', function() {
+                this.classList.toggle('active'); 
+                filterWorks(); 
+            });
+        });
+        searchInput.addEventListener('input', filterWorks);
+        clearBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            filterTags.forEach(tag => tag.classList.remove('active')); 
+            filterWorks(); 
+        });
+        function filterWorks() {
+            const normalize = str => str.replace(/\s+/g, ' ').toLowerCase().trim();
+            const searchTerm = normalize(searchInput.value);
+            const groups = document.querySelectorAll('.filter-group');
+            const activeFilters = [];
+            groups.forEach(group => {
+                const activeTags = Array.from(group.querySelectorAll('.tag.active')).map(t => normalize(t.textContent));
+                if (activeTags.length > 0) activeFilters.push(activeTags);
+            });
+            workCards.forEach(card => {
+                const title = normalize(card.querySelector('.work-title').textContent);
+                const cardTags = Array.from(card.querySelectorAll('.mini-tag')).map(t => normalize(t.textContent));
+                const cardContent = title + ' ' + cardTags.join(' ');
+                const matchesSearch = cardContent.includes(searchTerm);
+                const matchesFilters = activeFilters.every(groupTags => groupTags.some(filterTag => cardTags.includes(filterTag)));
+                if (matchesSearch && matchesFilters) { card.style.display = 'block'; card.style.animation = 'fadeIn 0.5s ease'; } else { card.style.display = 'none'; }
+            });
+        }
+
+        // === 弹窗逻辑 (超级升级版) ===
+        const modal = document.getElementById('workModal');
+        const closeModal = document.querySelector('.close-modal');
+        const modalImg = document.getElementById('modalImg');
+        const modalVideo = document.getElementById('modalVideo');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalDesc = document.getElementById('modalDesc');
+        const modalTagsContainer = document.getElementById('modalTags');
+        const modalPlatforms = document.getElementById('modalPlatforms');
+        const platformIconsContainer = document.getElementById('platformIconsContainer');
+
+        // 图标资源映射 (你需要确保这些图片存在)
+        const iconMap = {
+            'xhs': 'assets/images/xhs2.png',
+            'dy': 'assets/images/douyin.png',
+            'ins': 'assets/images/ins.png',
+            'wc': 'assets/images/sph.png',
+            'wyy': 'assets/images/wyy.png'
+        };
+
+        workCards.forEach(card => {
+            card.addEventListener('click', () => {
+                const imgSrc = card.querySelector('.work-img').src;
+                const title = card.querySelector('.work-title').textContent;
+                const desc = card.getAttribute('data-desc') || "";
+                const videoSrc = card.getAttribute('data-video'); // 获取视频路径
+                const linksData = card.getAttribute('data-links'); // 获取链接数据
+                const tags = Array.from(card.querySelectorAll('.mini-tag')).map(t => t.textContent);
+                
+                // 1. 设置基础信息
+                modalTitle.textContent = title;
+                modalDesc.textContent = desc;
+
+                // 2. 处理媒体 (视频 vs 图片)
+                const hasVisualTag = tags.includes('视觉');
+                const hasMusicTag = tags.includes('音乐');
+
+                if ((hasVisualTag || hasMusicTag) && videoSrc) {
+                    // 显示视频播放器
+                    modalImg.style.display = 'none';
+                    modalVideo.style.display = 'block';
+                    modalVideo.src = videoSrc;
+                    modalVideo.load(); // 加载视频
+                    // 只有视觉才自动静音播放，音乐不自动
+                    if (hasVisualTag) {
+                       modalVideo.muted = false; // 默认开启声音
+                       // modalVideo.play(); // 某些浏览器可能会拦截自动播放，最好留给用户点击
+                    }
+                } else {
+                    // 显示静态图片
+                    modalVideo.style.display = 'none';
+                    modalVideo.pause();
+                    modalImg.src = imgSrc;
+                    modalImg.style.display = 'block';
+                }
+
+                // 3. 处理标签
+                modalTagsContainer.innerHTML = '';
+                tags.forEach(tagText => {
+                    const span = document.createElement('span');
+                    span.className = 'modal-tag';
+                    span.textContent = tagText;
+                    modalTagsContainer.appendChild(span);
+                });
+
+              // 4. 处理平台图标 (包含微信二维码特殊处理)
+                platformIconsContainer.innerHTML = '';
+                if (linksData) {
+                    modalPlatforms.style.display = 'block';
+                    const links = linksData.split(',');
+
+                    links.forEach(linkPair => {
+                        const pair = linkPair.trim();
+                        const firstColonIndex = pair.indexOf(':');
+                        
+                        if (firstColonIndex !== -1) {
+                            const platform = pair.substring(0, firstColonIndex).trim();
+                            const content = pair.substring(firstColonIndex + 1).trim(); // 这里可能是链接，也可能是图片路径
+
+                            if (platform && content && iconMap[platform]) {
+                                const a = document.createElement('a');
+                                
+                                // ⭐⭐ 核心修改：如果是微信 (wc)，直接用路径；如果是别的，才加 https ⭐⭐
+                                if (platform === 'wc') {
+                                    a.href = content; // 直接链接到图片路径 (如 assets/images/wc-code.png)
+                                    a.title = "点击查看二维码";
+                                } else {
+                                    // 其他平台智能补全 https
+                                    a.href = content.startsWith('http') ? content : 'https://' + content;
+                                }
+                                
+                                a.target = '_blank'; // 在新窗口打开
+                                a.className = 'platform-link';
+                                
+                                const img = document.createElement('img');
+                                img.src = iconMap[platform];
+                                img.className = 'platform-icon-img';
+                                
+                                a.appendChild(img);
+                                platformIconsContainer.appendChild(a);
+                            }
+                        }
+                    });
+                } else {
+                    modalPlatforms.style.display = 'none';
+                }
+
+                modal.style.display = 'flex';
+            });
+        });
+
+        function hideModal() {
+            modal.style.display = 'none';
+            modalVideo.pause(); // 关闭时停止播放
+            modalVideo.src = ""; // 清空资源
+        }
+
+        closeModal.addEventListener('click', hideModal);
+        modal.addEventListener('click', (e) => { if (e.target === modal) hideModal(); });
+    });
+  </script>
+
+</body>
+</html>
